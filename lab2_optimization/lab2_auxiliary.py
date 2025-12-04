@@ -20,51 +20,56 @@ def plot_3D(x, y, fun):
             colorscale="Viridis",
             showscale=True,            # Display color scale bar on the side
             colorbar=dict(
-                title="Value",               # Title for color bar
-                titleside="right",
-                titlefont=dict(color="white"),  # Title color for color bar
+                title= dict( 
+                    text = "Value",               # Title for color bar
+                    side="right",
+                    font =dict(color="white")
+                    ),  # Title for color bar
                 tickfont=dict(color="white")    # Color for the color bar numbers
             ),      # Choose a visually pleasing color scale
         ))
 
         # Customize the layout to improve plot aesthetics
          # Dark theme settings
-    fig.update_layout(
-        title="3D Surface Plot",  # Add a title
-        title_font=dict(color='white'),               # Title color in dark theme
+    fig.update_layout( dict(
+        title= dict( 
+            text = "3D Surface Plot",  # Add a title
+            font=dict(color='white') # Title color in dark theme
+            ),               
         scene=dict(
             xaxis=dict(
-                title='x',
+                title= dict(text = 'x', font=dict(color='white')),
                 showgrid=True, 
                 showline=True, 
                 linewidth=2, 
                 linecolor='white',       # Set axis line color
                 tickfont=dict(color='white'),    # Set tick labels color
-                titlefont=dict(color='white')    # Set axis title color
+                # titlefont=dict(color='white')    # Set axis title color
             ),
             yaxis=dict(
-                title='y',
+                title= dict(text = 'y', font=dict(color='white')),
                 showgrid=True, 
                 showline=True, 
                 linewidth=2, 
                 linecolor='white',
                 tickfont=dict(color='white'),
-                titlefont=dict(color='white')
+                # titlefont=dict(color='white')
             ),
             zaxis=dict(
-                title='f(x, y)',
+                title= dict(text = 'f(x, y)', font=dict(color='white')),
                 showgrid=True, 
                 showline=True, 
                 linewidth=2, 
                 linecolor='white',
                 tickfont=dict(color='white'),
-                titlefont=dict(color='white')
+                # titlefont=dict(color='white')
             ),
             bgcolor='black',                 # Set background color of the plot area
         ),
         paper_bgcolor='black',               # Set the background color of the figure
         plot_bgcolor='black',                # Set the plot background color
         margin=dict(l=0, r=0, t=50, b=0),    # Minimize margins
+    )
     )
     
     camera=dict(eye=dict(x=2.0, y=1.1, z=0.5))  # Optimal view angle
