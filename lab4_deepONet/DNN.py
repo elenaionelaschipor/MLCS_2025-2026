@@ -1,8 +1,6 @@
 import torch
 torch.set_default_dtype(torch.float64)
-device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-torch.set_default_device(device) # default tensor device
-print("I'm using: ", device)
+
 
 class DeepNet(torch.nn.Module):
     def __init__(self, activation, n_input, n_hidden=None, n_output=None):
@@ -50,4 +48,4 @@ class DeepNet(torch.nn.Module):
             
         if self.output is not None:
             x = self.output(x)
-        return x
+return x
