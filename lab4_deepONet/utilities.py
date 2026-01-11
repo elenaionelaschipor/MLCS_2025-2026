@@ -147,6 +147,9 @@ def plot_results(x, true_solutions, predicted_solutions, num_samples_to_plot=3):
 
     true_solutions = true_solutions.to('cpu')
     predicted_solutions = predicted_solutions.to('cpu')
+    print('initial shapes')
+    print(true_solutions.shape)
+    print(predicted_solutions.shape)
 
     # error = torch.mean(torch.abs(true_solutions - predicted_solutions), dim = 1)
     # idx = torch.argsort(error)[:num_samples_to_plot]
@@ -154,7 +157,10 @@ def plot_results(x, true_solutions, predicted_solutions, num_samples_to_plot=3):
     fig, axs = plt.subplots(1, num_samples_to_plot, figsize=(12, 5))
     for (idplot, i) in enumerate(random.sample(range(true_solutions.shape[0]), num_samples_to_plot)):
         axs[idplot].plot(x, true_solutions[i, :], label='Exact', linestyle='--')
-        axs[idplot].plot(x, predicted_solutions[i, :], label='Computed', marker='.')
+        # print('i', i)
+        # print(predicted_solutions[i, :])
+        axs[idplot].plot(x, predicted_solutions.squeeze(), label='Computed', marker='.')
+        
         axs[idplot].set_xlabel('x')
         axs[idplot].legend()
         axs[idplot].grid()

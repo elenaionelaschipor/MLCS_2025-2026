@@ -48,4 +48,4 @@ class DeepNet(torch.nn.Module):
             
         if self.output is not None:
             x = self.output(x)
-return x
+        return x
