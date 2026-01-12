@@ -13,23 +13,27 @@ import torch
 torch.set_default_dtype(torch.float64)
 
 
-def generate_data(nsamples, nx):
+def generate_data(nsamples, nx):   # number of samples, number of collocation points
 
-    uh = torch.zeros((nsamples, nx))
+    uh = torch.zeros((nsamples, nx))  
     graduh = torch.zeros((nsamples, nx))
     a = torch.zeros((nsamples, nx))
-    for i in range(nsamples):
-        coefs = 8*np.random.rand(3)
-        points, this_uh, this_a, this_graduh = poisson_solver(coefs, nx)
-        normal = np.max(np.abs(this_uh.x.array))
-        uh[i, :] = torch.Tensor(this_uh.x.array/normal)
-        graduh[i, :] = torch.Tensor(this_graduh.x.array/normal)
-        a[i, :] = torch.Tensor(this_a.x.array*normal)
+    for i in range(nsamples):           # per ogni campione...
+        coefs = 8*np.random.rand(3)     # genero coefficienti casuali (tra 0 e 8??? ok)
+        points, this_uh, this_a, this_graduh = poisson_solver(coefs, nx)  # ci fidiamo
+        
+        normal = np.max(np.abs(this_uh.x.array))   # norma infinito
+        uh[i, :] = torch.Tensor(this_uh.x.array/normal) # normalizzo
+        graduh[i, :] = torch.Tensor(this_graduh.x.array/normal) # normalizzo
+        a[i, :] = torch.Tensor(this_a.x.array*normal) # de-normalizzo a(x)
 
     points = torch.Tensor(points)
     return points, a, uh, graduh
 
-def poisson_solver(coefs, nx):
+
+def poisson_solver(coefs, nx):   
+    # coefs è una lista di 3 coefficienti, sarebbero [a1 a2 a3] usati per definire a(x)
+    # nx = numero di punti di collocazione
     domain = mesh.create_unit_interval(MPI.COMM_WORLD, nx-1)
     V = functionspace(domain, ("Lagrange", 1))
     uD = fem.Constant(domain, default_scalar_type(0))
@@ -69,7 +73,7 @@ def poisson_solver(coefs, nx):
     graduh.interpolate(graduh_exp)
 
     # graduh = TrailFunction()
-#    agrad = ufl.inner(graduh, v)
+    # agrad = ufl.inner(graduh, v)
 
     points = V.tabulate_dof_coordinates()[:,0]
     return points, uh, diff_a, graduh
