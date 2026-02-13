@@ -1,0 +1,26 @@
+#### EXAMPLE OF yml FILE FOR DEEPONET
+#### Dataset parameters
+dataset_train: "dataset/datasetFHN_train_w.mat" 
+dataset_test: "dataset/datasetFHN_test_w.mat"
+arc: "DON"
+full_v_data: False
+batch_size: 100
+#### Architecture parameters
+adapt_actfun: True
+scheduler: "reduceonplateau"
+Loss: "L2"
+epochs: 100
+lr: # recover paper architecture 
+u_dim: 3   # Input dimension for Branch Net
+x_dim: 1   # Input dimension for Trunk Net
+G_dim: # recover output dimension from paper architecture
+inner_layer_b: # recover paper architecture (example: 3 layers of 100 neurons each [100, 100, 100])
+inner_layer_t: # recover paper architecture (example: 3 layers of 100 neurons each [100, 100, 100])
+activation_b: "Tanh"
+activation_t: "Tanh"
+arc_b: # play with this parameter: FFN or FFN_LN
+arc_t: # play with this parameter: FFN or FFN_LN
+initial_b: "Glorot normal"
+initial_t: "Glorot normal"
+#### Plotting and tensorboard
+show_every: 5 # epochs

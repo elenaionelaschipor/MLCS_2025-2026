@@ -1,0 +1,64 @@
+from timeit import default_timer
+import torch
+from .utility_dataset import *
+from .architectures import L2relLoss
+
+class Training():
+    def __init__(self, model, epochs, optimizer, schedulerName, scheduler, loss, 
+                 dataset_test, ntrain, ntest, train_loader, test_loader, 
+                 x_train, x_test, device='cpu', show_every=100):
+        self.model         = model
+        self.epochs        = epochs
+        self.optimizer     = optimizer
+        self.schedulerName = schedulerName
+        self.scheduler     = scheduler
+        self.loss          = loss
+        self.dataset_test  = dataset_test
+        self.ntrain        = ntrain
+        self.ntest         = ntest   
+        self.train_loader  = train_loader
+        self.test_loader   = test_loader
+        self.x_train       = x_train
+        self.x_test        = x_test
+        self.device        = device
+        self.show_every    = show_every
+
+    def single_train_step(self,ep,t1):
+        #### One epoch of training
+            self.model.train()
+            train_loss = 0
+            for v, u in self.train_loader:
+                v, u = v.to(self.device), u.to(self.device)
+                if len(u.shape) > 2:
+                    u    = u.permute(2,0,1) # e.g. back to (4,1600,500) for train
+                self.optimizer.zero_grad() # annealing the gradient
+                out = self.model.forward((v,self.x_train)) # compute the output
+                # compute the loss
+                loss = self.loss(out, u)
+                train_loss += loss.item() # update the loss function
+                loss.backward() # automatic back propagation
+                self.optimizer.step()
+            
+            #### Evaluate the model on the test set
+            self.model.eval()
+            test_l2  = 0.0
+            with torch.no_grad():
+                for v, u in self.test_loader:
+                    v, u = v.to(self.device), u.to(self.device)
+                    out = self.model.forward((v,self.x_test))  
+                    test_l2 += L2relLoss()(out, u).item()
+            
+            train_loss/= self.ntrain
+            test_l2/= self.ntest
+
+            t2 = default_timer()
+            if ep % self.show_every == 0:
+                print(f'Epoch:{ep}  Time:{t2 - t1:.{2}f}  '
+                  f'Train_loss_{self.loss.get_name()}:{train_loss:.{5}f}  '
+                  f'Test_loss_l2:{test_l2:.{5}f}  '
+                  )
+
+    def train(self):    
+        t1 = default_timer()
+        for ep in range(self.epochs+1):
+            self.single_train_step(ep,t1)

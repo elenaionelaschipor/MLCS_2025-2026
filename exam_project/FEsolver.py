@@ -6,7 +6,7 @@ import ufl
 
 from dolfinx.fem import functionspace
 
-from dolfinx.fem.petsc import LinearProblem  
+# from dolfinx.fem import LinearProblem  
 from dolfinx import fem
 from dolfinx import default_scalar_type
 import numpy as np
@@ -90,10 +90,34 @@ def poisson_solver(coefs, nx):
     a = ufl.dot(diff_a * ufl.grad(u), ufl.grad(v)) * ufl.dx
     L = f * v * ufl.dx
 
-    problem = fem.petsc.LinearProblem(a, L, bcs=[bc],
-                                    petsc_options={"ksp_type": "preonly", "pc_type": "lu"})
 
-    uh = problem.solve()
+    from dolfinx.fem import assemble_matrix, assemble_vector, apply_lifting, set_bc
+    from petsc4py import PETSc
+
+    # Assembla matrice e vettore
+    A = assemble_matrix(a, bcs=[bc])
+    A.assemble()
+
+    b = assemble_vector(L)
+    apply_lifting(b, [a], bcs=[[bc]])
+    b.ghostUpdate(addv=PETSc.InsertMode.ADD, mode=PETSc.ScatterMode.REVERSE)
+    set_bc(b, [bc])
+
+    # Risolutore lineare PETSc
+    ksp = PETSc.KSP().create()
+    ksp.setOperators(A)
+    ksp.setType(PETSc.KSP.Type.CG)
+    ksp.getPC().setType(PETSc.PC.Type.HYPRE)  # o 'jacobi' se HYPRE non c’è
+    ksp.setFromOptions()
+
+    uh = fem.Function(V)
+    ksp.solve(b, uh.vector)
+    uh.x.scatter_forward()
+
+    # problem = fem.petsc.LinearProblem(a, L, bcs=[bc],
+    #                                 petsc_options={"ksp_type": "preonly", "pc_type": "lu"})
+
+    # uh = problem.solve()
 
     grad_expr = fem.Expression(ufl.grad(uh), V.element.interpolation_points())
     graduh = fem.Function(V)
